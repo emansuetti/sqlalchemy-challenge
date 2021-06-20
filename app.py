@@ -1,8 +1,5 @@
 import datetime as dt
 import numpy as np
-import pandas as pd
-
-import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
@@ -10,32 +7,28 @@ from sqlalchemy import create_engine, func
 from flask import Flask, jsonify
 
 
-#################################################
 # Database Setup
-#################################################
 engine = create_engine("sqlite:///hawaii.sqlite")
 
-# reflect an existing database into a new model
+# reflect an existing database
 Base = automap_base()
-# reflect the tables
 Base.prepare(engine, reflect=True)
 
-# Save references to each table
+# save vaiables for use in code
 Measurement = Base.classes.measurement
 Station = Base.classes.station
 
-# Create our session (link) from Python to the DB
+# Create session
 session = Session(engine)
 
-#################################################
+
 # Flask Setup
-#################################################
+
 app = Flask(__name__)
 
 
-#################################################
+
 # Flask Routes
-#################################################
 
 @app.route("/")
 def welcome():
@@ -44,8 +37,8 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/temp/<start>(for start value use YYYY-MM-DD as imput)"
-        f"/api/v1.0/temp/start/end(for start and end value use YYYY-MM-DD as imput)"
+        f"/api/v1.0/temp/<start>(for start value use YYYY-MM-DD as imput)<br/>"
+        f"/api/v1.0/temp/<start>/<end>(for start and end value use YYYY-MM-DD as imput)"
     )
 
 
@@ -64,20 +57,18 @@ def precipitation():
 
 @app.route("/api/v1.0/stations")
 def stations():
-    """Return a list of stations."""
     session = Session(engine)
 
     results = session.query(Station.station).all()
 
-    # Unravel results into a 1D array and convert to a list
     stations = list(np.ravel(results))
     return jsonify(stations=stations)
 
 
 @app.route("/api/v1.0/tobs")
 def temp_monthly():
-
     session = Session(engine)
+
     prev_year = dt.date(2017, 8, 23) - dt.timedelta(days=365)
 
     results = session.query(Measurement.tobs).\
